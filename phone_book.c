@@ -4,8 +4,7 @@
 
 const char *DB="directory.db";
 
-struct entry0 
-{
+struct entry0 {
   char name[20];
   char phone[20];
   struct entry0 *next;
@@ -38,10 +37,8 @@ void write_all_entries(entry *); /* Given the first node of a linked
                                     the given entries into the file */
 
 
-int main(int argc, char *argv[]) 
-{
-  if (argc == 1) 
-  {
+int main(int argc, char *argv[]) {
+  if (argc == 1) {
     print_usage("Insufficient arguments", argv[0]);
     exit(1);
   } 
@@ -56,8 +53,7 @@ int main(int argc, char *argv[])
     add(name, phone);
     exit(0);
   } else if (strcmp(argv[1], "list") == 0) {  /* Handle list */
-    if (argc != 2) 
-    {
+    if (argc != 2) {
       print_usage("Improper arguments for list", argv[0]);
       exit(1);
     }
@@ -65,9 +61,20 @@ int main(int argc, char *argv[])
     list(fp);
     fclose(fp);
     exit(0);
-  } else if (strcmp(argv[1], "search") == 0) 
-{  /* Handle search */
-    printf("NOT IMPLEMENTED!\n"); /* TBD  */
+  } else if (strcmp(argv[1], "search") == 0) {  /* Handle search */
+    if(argc != 3){
+       print_usage("Improper arguments for search", argv[0]);
+      exit(1);
+    }/* TBD  */
+    FILE *fp = open_db_file();
+    char *name = argv[2];
+    if (!search(fp, name)) {
+      printf("no match\n");
+      fclose(fp);
+      exit(1);
+    }
+    fclose(fp);
+    exit(0); 
   } else if (strcmp(argv[1], "delete") == 0) {  /* Handle delete */
     if (argc != 3) {
       print_usage("Improper arguments for delete", argv[0]);
@@ -99,7 +106,12 @@ FILE *open_db_file() {
   
 void free_entries(entry *p) {
   /* TBD */
-  printf("Memory is not being freed. This needs to be fixed!\n");  
+ while(p!=NULL){
+  free(p);
+  p =p->next;
+ }
+  
+  //printf("Memory is not being freed. This needs to be fixed!\n");  
 }
 
 void print_usage(char *message, char *progname) {
@@ -126,8 +138,8 @@ create_entry_node(char *name, char *phone) {
   return ret;
 }
 
-
-entry *load_entries(FILE *fp) {
+entry *
+load_entries(FILE *fp) {
   char name[20], phone[20];
   memset(name, '\0', 20);
   memset(phone, '\0', 20);
@@ -136,20 +148,17 @@ entry *load_entries(FILE *fp) {
   entry *tmp = NULL;
   /* Description of %20[^,\n]
      % is the start of the specifier (like %s, %i etc.)
-
      20 is the maximum number of characters that this will take. We
         know that names and phone numbers will be 20 bytes maximum so
         we limit it to that. %20s will read in 20 character strings
         (including the , to separate the name and phone number. That's
         why we use
-
     [^,\n] Square brackets are used to indicate a set of allowed
            characters [abc] means only a, b, or c. With the ^, it's
            used to specify a set of disallowed characters. So [^abc]
            means any character *except* a, b, or c. [^,] means any
            character except a , [^,\n] means any character except a
            comma(,) or a newline(\n).
-
     %20[^,\n] will match a string of characters with a maximum length
      of 20 characters that doesn't have a comma(,) or a newline(\n).
   */        
@@ -179,16 +188,37 @@ void add(char *name, char *phone) {
   fprintf(fp, "%s,%s\n", name, phone);
   fclose(fp);
 }
+int search(FILE *db_file,char *name){
+  entry *p = load_entries(db_file);
+  entry *base = p;
+  int found = 0;
+  while(p!=NULL){
+  if(strcmp(p->name,name) == 0){
+  printf("%s\n",p->phone);
+ 
+  found = 1;
+  }
+   p=p->next;
+  }
+  free_entries(base);
+  return found;
+}
 
+int size = 0;
 void list(FILE *db_file) {
   entry *p = load_entries(db_file);
   entry *base = p;
+  int count = 0;
   while (p!=NULL) {
     printf("%-20s : %10s\n", p->name, p->phone);
+    count++;
     p=p->next;
   }
   /* TBD print total count */
+  size =count;
+  printf("Total entries :  %d\n",count);
   free_entries(base);
+ 
 }
 
 
@@ -198,6 +228,7 @@ int delete(FILE *db_file, char *name) {
   entry *prev = NULL;
   entry *del = NULL ; /* Node to be deleted */
   int deleted = 0;
+
   while (p!=NULL) {
     if (strcmp(p->name, name) == 0) {
       /* Matching node found. Delete it from the linked list.
@@ -212,10 +243,25 @@ int delete(FILE *db_file, char *name) {
       */
 
       /* TBD */
+      
+       if(strcmp(base->name, name) == 0){
+         base = p->next;
+       }
+      else{ p = p->next;
+      
+       prev->next = p;
+          }
+      
+       deleted = 1;
+       break;
     }
+    else{
+      prev = p;
+      p = p->next;
+    }
+   
   }
   write_all_entries(base);
   free_entries(base);
   return deleted;
-}
-
+} 
