@@ -1,8 +1,11 @@
-include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 const char *DB="directory.db";
 
-struct entry0 {
+struct entry0 
+{
   char name[20];
   char phone[20];
   struct entry0 *next;
@@ -35,8 +38,10 @@ void write_all_entries(entry *); /* Given the first node of a linked
                                     the given entries into the file */
 
 
-int main(int argc, char *argv[]) {
-  if (argc == 1) {
+int main(int argc, char *argv[]) 
+{
+  if (argc == 1) 
+  {
     print_usage("Insufficient arguments", argv[0]);
     exit(1);
   } 
@@ -51,7 +56,8 @@ int main(int argc, char *argv[]) {
     add(name, phone);
     exit(0);
   } else if (strcmp(argv[1], "list") == 0) {  /* Handle list */
-    if (argc != 2) {
+    if (argc != 2) 
+    {
       print_usage("Improper arguments for list", argv[0]);
       exit(1);
     }
@@ -59,7 +65,8 @@ int main(int argc, char *argv[]) {
     list(fp);
     fclose(fp);
     exit(0);
-  } else if (strcmp(argv[1], "search") == 0) {  /* Handle search */
+  } else if (strcmp(argv[1], "search") == 0) 
+{  /* Handle search */
     printf("NOT IMPLEMENTED!\n"); /* TBD  */
   } else if (strcmp(argv[1], "delete") == 0) {  /* Handle delete */
     if (argc != 3) {
