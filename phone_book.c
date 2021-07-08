@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+include <string.h>
 
 const char *DB="directory.db";
 
@@ -213,3 +211,4 @@ int delete(FILE *db_file, char *name) {
   free_entries(base);
   return deleted;
 }
+
